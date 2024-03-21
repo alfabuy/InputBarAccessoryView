@@ -56,20 +56,16 @@ open class AttachmentCell: UICollectionViewCell {
     
     open lazy var deleteButton: UIButton = { [weak self] in
         let button = UIButton()
-        let textColor: UIColor
-        if #available(iOS 13, *) {
-            textColor = .systemBackground
-        } else {
-            textColor = .white
-        }
-        button.setAttributedTitle(NSMutableAttributedString().bold("X", fontSize: 15, textColor: textColor), for: .normal)
-        button.setAttributedTitle(NSMutableAttributedString().bold("X", fontSize: 15, textColor: textColor.withAlphaComponent(0.5)), for: .highlighted)
+        let image = UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate)
+        button.setImage(image, for: .normal)
+        button.tintColor = tintColor
         button.layer.cornerRadius = 10
         button.clipsToBounds = true
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .black
         button.addTarget(self, action: #selector(deleteAttachment), for: .touchUpInside)
         return button
     }()
+
     
     open var attachment: AttachmentManager.Attachment?
     
@@ -138,5 +134,20 @@ open class AttachmentCell: UICollectionViewCell {
         
         guard let index = indexPath?.row else { return }
         manager?.removeAttachment(at: index)
+    }
+}
+
+extension UIColor {
+    convenience init(hex: String) {
+        let scanner = Scanner(string: hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
+        var hexNumber: UInt64 = 0
+        if scanner.scanHexInt64(&hexNumber) {
+            let red = CGFloat((hexNumber & 0xFF0000) >> 16) / 255
+            let green = CGFloat((hexNumber & 0x00FF00) >> 8) / 255
+            let blue = CGFloat(hexNumber & 0x0000FF) / 255
+            self.init(red: red, green: green, blue: blue, alpha: 1.0)
+        } else {
+            self.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        }
     }
 }

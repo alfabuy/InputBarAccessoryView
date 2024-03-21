@@ -26,6 +26,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 open class AttachmentManager: NSObject, InputPlugin {
     
@@ -33,7 +34,7 @@ open class AttachmentManager: NSObject, InputPlugin {
         case image(UIImage)
         case url(URL)
         case data(Data)
-        
+        case video(URL)
         @available(*, deprecated, message: ".other(AnyObject) has been depricated as of 2.0.0")
         case other(AnyObject)
     }
@@ -99,7 +100,11 @@ open class AttachmentManager: NSObject, InputPlugin {
         if let image = object as? UIImage {
             attachment = .image(image)
         } else if let url = object as? URL {
-            attachment = .url(url)
+            if isVideoURL(url) {
+                attachment = .video(url)
+            } else {
+                attachment = .url(url)
+            }
         } else if let data = object as? Data {
             attachment = .data(data)
         } else {
@@ -109,6 +114,12 @@ open class AttachmentManager: NSObject, InputPlugin {
         insertAttachment(attachment, at: attachments.count)
         return true
     }
+
+    private func isVideoURL(_ url: URL) -> Bool {
+        let videoExtensions: [String] = ["mov", "mp4", "m4v"]
+        return videoExtensions.contains(url.pathExtension.lowercased())
+    }
+
     
     // MARK: - API [Public]
     
@@ -188,8 +199,24 @@ extension AttachmentManager: UICollectionViewDataSource, UICollectionViewDelegat
                 cell.indexPath = indexPath
                 cell.manager = self
                 cell.imageView.image = image
-                cell.imageView.tintColor = tintColor
-                cell.deleteButton.backgroundColor = tintColor
+                cell.imageView.subviews.forEach { $0.removeFromSuperview() }
+                return cell
+            case .video(let videoURL):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageAttachmentCell.reuseIdentifier, for: indexPath) as? ImageAttachmentCell else {
+                    fatalError()
+                }
+
+                cell.imageView.image = generateThumbnailFrom(videoURL: videoURL)
+                cell.attachment = attachment
+                cell.indexPath = indexPath
+                cell.manager = self
+
+                let playIcon = UIImage(systemName: "play.circle")?.withTintColor(tintColor, renderingMode: .alwaysOriginal)
+                let playImageView = UIImageView(image: playIcon)
+                playImageView.contentMode = .center
+                playImageView.frame = cell.imageView.bounds
+                cell.imageView.addSubview(playImageView)
+                
                 return cell
             default:
                 return collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCell.reuseIdentifier, for: indexPath) as! AttachmentCell
@@ -197,7 +224,20 @@ extension AttachmentManager: UICollectionViewDataSource, UICollectionViewDelegat
             
         }
     }
-    
+
+    private func generateThumbnailFrom(videoURL: URL) -> UIImage? {
+        let asset = AVAsset(url: videoURL)
+        let assetImgGenerate = AVAssetImageGenerator(asset: asset)
+        assetImgGenerate.appliesPreferredTrackTransform = true
+        let time = CMTimeMake(value: 0, timescale: 1)
+        do {
+            let img = try assetImgGenerate.copyCGImage(at: time, actualTime: nil)
+            return UIImage(cgImage: img)
+        } catch {
+            print("Error generating thumbnail: \(error)")
+            return nil
+        }
+    }
     // MARK: - UICollectionViewDelegateFlowLayout
     
     final public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
