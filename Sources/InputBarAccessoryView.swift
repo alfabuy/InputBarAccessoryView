@@ -468,11 +468,13 @@ open class InputBarAccessoryView: UIView {
         setupObservers()
         setupGestureRecognizers()
 		setupMediaButtonsActions()
+		setupInputTextView()
     }
 	
 	private func setupInputTextView() {
 		inputTextView.layer.borderColor = UIColor.darkGray.cgColor
 		inputTextView.layer.borderWidth = 0.75
+		inputTextView.textColor = .white
 		inputTextView.layer.cornerRadius = 20.0
 		inputTextView.layer.masksToBounds = true
 		inputTextView.scrollIndicatorInsets = UIEdgeInsets(top: 4, left: 0, bottom: 4, right: 0)
