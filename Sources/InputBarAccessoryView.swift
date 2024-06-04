@@ -26,6 +26,7 @@
 //
 
 import UIKit
+import CustomBlurEffectView
 
 /// A powerful InputAccessoryView ideal for messaging applications
 open class InputBarAccessoryView: UIView {
@@ -39,6 +40,7 @@ open class InputBarAccessoryView: UIView {
     /// with a top anchor equal to the bottom of the top InputStackView
     open var backgroundView: UIView = {
         let view = UIView()
+		view.backgroundColor = .clear
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = InputBarAccessoryView.defaultBackgroundColor
         return view
@@ -59,31 +61,23 @@ open class InputBarAccessoryView: UIView {
      ## Important Notes ##
      1. The blurView is initially not added to the backgroundView to improve performance when not needed. When `isTranslucent` is set to TRUE for the first time the blurView is added and anchored to the `backgroundView`s edge anchors
     */
-    open lazy var blurView: UIVisualEffectView = {
-        var blurEffect = UIBlurEffect(style: .light)
-        if #available(iOS 13, *) {
-            blurEffect = UIBlurEffect(style: .systemMaterial)
-        }
-        let view = UIVisualEffectView(effect: blurEffect)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    open lazy var blurView: CustomBlurEffectView = {
+		return CustomBlurEffectView(radius: 20, color: .black, colorAlpha: 0.8)
     }()
     
     /// Determines if the InputBarAccessoryView should have a translucent effect
-    open var isTranslucent: Bool = false {
-        didSet {
-            if isTranslucent && blurView.superview == nil {
-                backgroundView.addSubview(blurView)
-                blurView.fillSuperview()
-            }
-            blurView.isHidden = !isTranslucent
-            let color: UIColor = backgroundView.backgroundColor ?? InputBarAccessoryView.defaultBackgroundColor
-            backgroundView.backgroundColor = isTranslucent ? color.withAlphaComponent(0.75) : color
-        }
-    }
+//    open var isTranslucent: Bool = false {
+//        didSet {
+//            if isTranslucent && blurView.superview == nil {
+//                backgroundView.addSubview(blurView)
+//                blurView.fillSuperview()
+//            }
+//            blurView.isHidden = !isTranslucent
+//            //let color: UIColor = backgroundView.backgroundColor ?? InputBarAccessoryView.defaultBackgroundColor
+//			backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+//        }
+//    }
 
-    /// A SeparatorLine that is anchored at the top of the InputBarAccessoryView
-    public let separatorLine = SeparatorLine()
     
     /**
      The InputStackView at the InputStackView.top position
@@ -143,11 +137,7 @@ open class InputBarAccessoryView: UIView {
     }()
 
     private static let defaultBackgroundColor: UIColor = {
-        if #available(iOS 13, *) {
-            return .systemBackground
-        } else {
-            return .white
-        }
+		return .clear
     }()
     
     /// The InputTextView a user can input a message in
@@ -159,17 +149,96 @@ open class InputBarAccessoryView: UIView {
     }()
     
     /// A InputBarButtonItem used as the send button and initially placed in the rightStackView
-    open var sendButton: InputBarSendButton = {
-        return InputBarSendButton()
-            .configure {
-                $0.setSize(CGSize(width: 52, height: 36), animated: false)
-                $0.isEnabled = false
-                $0.title = "Send"
-                $0.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .bold)
-            }.onTouchUpInside {
-                $0.inputBarAccessoryView?.didSelectSendButton()
-        }
-    }()
+	open var sendButton: InputBarSendButton = {
+		return InputBarSendButton()
+			.configure {
+				$0.setSize(CGSize(width: 36, height: 40), animated: false)
+				$0.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
+				$0.contentVerticalAlignment = .fill
+				$0.contentHorizontalAlignment = .fill
+				$0.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0)
+				$0.setTitle("", for: .normal)
+				$0.tintColor = .white
+				$0.isEnabled = false
+			}.onTouchUpInside {
+				$0.inputBarAccessoryView?.didSelectSendButton()
+			}
+	}()
+	
+	open var plusButton: InputBarButtonItem = {
+		return InputBarButtonItem()
+			.configure {
+				$0.setSize(CGSize(width: 36, height: 40), animated: false)
+				$0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
+				$0.contentVerticalAlignment = .fill
+				$0.contentHorizontalAlignment = .fill
+				$0.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0)
+				$0.setTitle("", for: .normal)
+				$0.tintColor = .white
+				$0.isEnabled = true
+			}
+	}()
+
+	open var photoButton: InputBarButtonItem = {
+		return InputBarButtonItem()
+			.configure {
+				$0.setSize(CGSize(width: 36, height: 40), animated: false)
+				$0.setImage(UIImage(systemName: "photo.circle.fill"), for: .normal)
+				$0.contentVerticalAlignment = .fill
+				$0.contentHorizontalAlignment = .fill
+				$0.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0)
+				$0.setTitle("", for: .normal)
+				$0.tintColor = .white
+				$0.isHidden = false
+				$0.isEnabled = true
+			}
+	}()
+	
+	open var videoButton: InputBarButtonItem = {
+		return InputBarButtonItem()
+			.configure {
+				$0.setSize(CGSize(width: 36, height: 40), animated: false)
+				$0.setImage(UIImage(systemName: "video.circle.fill"), for: .normal)
+				$0.contentVerticalAlignment = .fill
+				$0.contentHorizontalAlignment = .fill
+				$0.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0)
+				$0.setTitle("", for: .normal)
+				$0.tintColor = .white
+				$0.isHidden = false
+				$0.isEnabled = true
+			}
+	}()
+	
+	open var locationButton: InputBarButtonItem = {
+		return InputBarButtonItem()
+			.configure {
+				$0.setSize(CGSize(width: 36, height: 40), animated: false)
+				$0.setImage(UIImage(systemName: "location.circle.fill"), for: .normal)
+				$0.contentVerticalAlignment = .fill
+				$0.contentHorizontalAlignment = .fill
+				$0.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0)
+				$0.setTitle("", for: .normal)
+				$0.tintColor = .white
+				$0.isHidden = false
+				$0.isEnabled = true
+			}
+	}()
+	
+	open var cameraButton: InputBarButtonItem = {
+		return InputBarButtonItem()
+			.configure {
+				$0.setSize(CGSize(width: 36, height: 40), animated: false)
+				$0.setImage(UIImage(systemName: "camera.circle.fill"), for: .normal)
+				$0.contentVerticalAlignment = .fill
+				$0.contentHorizontalAlignment = .fill
+				$0.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0)
+				$0.setTitle("", for: .normal)
+				$0.tintColor = .white
+				$0.isHidden = false
+				$0.isEnabled = true
+			}
+	}()
+	
 
     /**
      The anchor contants used to add horizontal inset from the InputBarAccessoryView and the
@@ -205,7 +274,7 @@ open class InputBarAccessoryView: UIView {
      ````
      
      */
-    open var padding: UIEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12) {
+    open var padding: UIEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 8, right: 12) {
         didSet {
             updatePadding()
         }
@@ -240,7 +309,7 @@ open class InputBarAccessoryView: UIView {
      ````
      
      */
-    open var middleContentViewPadding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 8) {
+    open var middleContentViewPadding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 8) {
         didSet {
             updateMiddleContentViewPadding()
         }
@@ -291,7 +360,7 @@ open class InputBarAccessoryView: UIView {
     /// A boolean that determines if the layout required for new or typed text should
     /// be animated.
     /// The default value is `FALSE`
-    open var shouldAnimateTextDidChangeLayout = false
+    open var shouldAnimateTextDidChangeLayout = true
     
     /// The height that will fit the current text in the InputTextView based on its current bounds
     public var requiredInputTextViewHeight: CGFloat {
@@ -398,8 +467,55 @@ open class InputBarAccessoryView: UIView {
         setupConstraints()
         setupObservers()
         setupGestureRecognizers()
+		setupMediaButtonsActions()
     }
+	
+	private func setupInputTextView() {
+		inputTextView.layer.borderColor = UIColor.darkGray.cgColor
+		inputTextView.layer.borderWidth = 0.75
+		inputTextView.layer.cornerRadius = 20.0
+		inputTextView.layer.masksToBounds = true
+		inputTextView.scrollIndicatorInsets = UIEdgeInsets(top: 4, left: 0, bottom: 4, right: 0)
+	}
     
+	private func setupMediaButtonsActions() {
+		setRightStackViewWidthConstant(to: 36, animated: false)
+		setStackViewItems([cameraButton, photoButton, videoButton, locationButton, plusButton], forStack: .left, animated: false)
+		setLeftStackViewWidthConstant(to: 36, animated: false)
+		plusButton.onTouchUpInside { [weak self] _ in
+			self?.showMediaButtons()
+		}
+	}
+	
+	private func showMediaButtons() {
+		self.cameraButton.isHidden = false
+		self.photoButton.isHidden = false
+		self.videoButton.isHidden = false
+		self.locationButton.isHidden = false
+		self.plusButton.isHidden = false
+		setLeftStackViewWidthConstant(to: 36*4, animated: true) {
+			self.plusButton.isHidden = true
+		}
+		impact()
+	}
+	
+	@objc func hideMediaButtons() {
+		setLeftStackViewWidthConstant(to: 36, animated: true) {
+			self.plusButton.isHidden = false
+			self.cameraButton.isHidden = true
+			self.photoButton.isHidden = true
+			self.videoButton.isHidden = true
+			self.locationButton.isHidden = true
+		}
+		inputTextView.becomeFirstResponder()
+	}
+	
+	private func impact() {
+		let generator = UIImpactFeedbackGenerator(style: .medium)
+		generator.prepare()
+		generator.impactOccurred()
+	}
+	
     /// Adds the required notification observers
     private func setupObservers() {
         NotificationCenter.default.addObserver(self,
@@ -429,11 +545,11 @@ open class InputBarAccessoryView: UIView {
     
     /// Adds all of the subviews
     private func setupSubviews() {
-        
+		backgroundView.addSubview(blurView)
+		blurView.fillSuperview()
         addSubview(backgroundView)
         addSubview(topStackView)
         addSubview(contentView)
-        addSubview(separatorLine)
         contentView.addSubview(middleContentViewWrapper)
         contentView.addSubview(leftStackView)
         contentView.addSubview(rightStackView)
@@ -446,8 +562,6 @@ open class InputBarAccessoryView: UIView {
     /// Sets up the initial constraints of each subview
     private func setupConstraints() {
         
-        // The constraints within the InputBarAccessoryView
-        separatorLine.addConstraints(topAnchor, left: backgroundView.leftAnchor, right: backgroundView.rightAnchor, heightConstant: separatorLine.height)
 
         backgroundViewLayoutSet = NSLayoutConstraintSet(
             top: backgroundView.topAnchor.constraint(equalTo: topStackView.bottomAnchor),
@@ -482,12 +596,12 @@ open class InputBarAccessoryView: UIView {
         maxTextViewHeight = calculateMaxTextViewHeight()
         textViewHeightAnchor = inputTextView.heightAnchor.constraint(equalToConstant: maxTextViewHeight)
         
-        leftStackViewLayoutSet = NSLayoutConstraintSet(
-            top:    leftStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
-            bottom: leftStackView.bottomAnchor.constraint(equalTo: middleContentViewWrapper.bottomAnchor, constant: 0),
-            left:   leftStackView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0),
-            width:  leftStackView.widthAnchor.constraint(equalToConstant: leftStackViewWidthConstant)
-        )
+		leftStackViewLayoutSet = NSLayoutConstraintSet(
+			top:    leftStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
+			bottom: leftStackView.bottomAnchor.constraint(equalTo: middleContentViewWrapper.bottomAnchor, constant: 0),
+			left:   leftStackView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0),
+			width:  leftStackView.widthAnchor.constraint(equalToConstant: leftStackViewWidthConstant)
+		)
         
         rightStackViewLayoutSet = NSLayoutConstraintSet(
             top:    rightStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
@@ -734,7 +848,7 @@ open class InputBarAccessoryView: UIView {
                     }
                 }
                 guard superview != nil else { return }
-                leftStackView.layoutIfNeeded()
+					leftStackView.layoutIfNeeded()
             case .right:
                 rightStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
                 rightStackViewItems = items
@@ -786,14 +900,14 @@ open class InputBarAccessoryView: UIView {
     ///   - newValue: New widthAnchor constant
     ///   - animated: If the layout should be animated
     ///   - extraAnimations: Any extra operations that should also be animated
-    open func setLeftStackViewWidthConstant(to newValue: CGFloat, animated: Bool, animations : (() -> Void)? = nil) {
-        performLayout(animated) { 
-            self.leftStackViewWidthConstant = newValue
-            self.layoutStackViews([.left])
-            self.layoutContainerViewIfNeeded()
-            animations?()
-        }
-    }
+	open func setLeftStackViewWidthConstant(to newValue: CGFloat, animated: Bool, animations : (() -> Void)? = nil) {
+		performLayout(animated) {
+			self.leftStackViewWidthConstant = newValue
+			self.layoutStackViews([.left])
+			self.layoutContainerViewIfNeeded()
+			animations?()
+		}
+	}
     
     /// Sets the rightStackViewWidthConstant
     ///
@@ -938,4 +1052,22 @@ open class InputBarAccessoryView: UIView {
     open func didSelectSendButton() {
         delegate?.inputBar(self, didPressSendButtonWith: inputTextView.text)
     }
+}
+
+extension UIImage {
+	/// Изменяет размер изображения так, чтобы оно поместилось в указанный размер, сохраняя пропорции.
+	/// - Parameter targetSize: Размер, в который должно поместиться изображение.
+	/// - Returns: Новое изображение с измененным размером.
+	func resizedToFit(in targetSize: CGSize) -> UIImage? {
+		let widthRatio  = targetSize.width  / self.size.width
+		let heightRatio = targetSize.height / self.size.height
+		let scaleFactor = min(widthRatio, heightRatio)
+		
+		let newSize = CGSize(width: self.size.width * scaleFactor, height: self.size.height * scaleFactor)
+		let renderer = UIGraphicsImageRenderer(size: newSize)
+		
+		return renderer.image { _ in
+			self.draw(in: CGRect(origin: .zero, size: newSize))
+		}
+	}
 }

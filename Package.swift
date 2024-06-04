@@ -4,17 +4,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "InputBarAccessoryView",
-    platforms: [.iOS(.v13)],
-    products: [
-        .library(name: "InputBarAccessoryView", targets: ["InputBarAccessoryView"]),
-    ],
-    targets: [
-        .target(
-            name: "InputBarAccessoryView",
-            path: "Sources",
-            exclude: ["Supporting/Info.plist"]
-        )
-    ],
-    swiftLanguageVersions: [.v5]
+	name: "InputBarAccessoryView",
+	platforms: [.iOS(.v15)],
+	products: [
+		.library(name: "InputBarAccessoryView", targets: ["InputBarAccessoryView"]),
+	],
+	dependencies: [
+		.package(url: "https://github.com/perfectdim/CustomBlurEffectView.git", from: "0.0.1")
+	],
+	targets: [
+		.target(
+			name: "InputBarAccessoryView",
+			dependencies: ["CustomBlurEffectView"],
+			path: "Sources",
+			exclude: ["Supporting/Info.plist"]
+		)
+	],
+	swiftLanguageVersions: [.v5]
 )
