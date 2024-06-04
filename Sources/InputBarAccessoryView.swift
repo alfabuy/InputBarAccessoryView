@@ -497,13 +497,15 @@ open class InputBarAccessoryView: UIView {
 		self.videoButton.isHidden = false
 		self.locationButton.isHidden = false
 		self.plusButton.isHidden = false
-		setLeftStackViewWidthConstant(to: 36*4, animated: true) {
+		leftStackView.spacing = 8
+		setLeftStackViewWidthConstant(to: 36*4 + 8*3, animated: true) {
 			self.plusButton.isHidden = true
 		}
 		impact()
 	}
 	
 	@objc func hideMediaButtons() {
+		leftStackView.spacing = 0
 		setLeftStackViewWidthConstant(to: 36, animated: true) {
 			self.plusButton.isHidden = false
 			self.cameraButton.isHidden = true
