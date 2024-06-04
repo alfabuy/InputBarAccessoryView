@@ -487,6 +487,8 @@ open class InputBarAccessoryView: UIView {
 		plusButton.onTouchUpInside { [weak self] _ in
 			self?.showMediaButtons()
 		}
+		let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideMediaButtons))
+		inputTextView.addGestureRecognizer(tapGesture)
 	}
 	
 	private func showMediaButtons() {
