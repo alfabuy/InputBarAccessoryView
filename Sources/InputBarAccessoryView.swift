@@ -497,16 +497,16 @@ open class InputBarAccessoryView: UIView {
 		self.videoButton.isHidden = false
 		self.locationButton.isHidden = false
 		self.plusButton.isHidden = false
-		leftStackView.spacing = 8
 		setLeftStackViewWidthConstant(to: 36*4 + 8*3, animated: true) {
+			self.leftStackView.spacing = 8
 			self.plusButton.isHidden = true
 		}
 		impact()
 	}
 	
 	@objc func hideMediaButtons() {
-		leftStackView.spacing = 0
 		setLeftStackViewWidthConstant(to: 36, animated: true) {
+			self.leftStackView.spacing = 0
 			self.plusButton.isHidden = false
 			self.cameraButton.isHidden = true
 			self.photoButton.isHidden = true
@@ -1060,20 +1060,3 @@ open class InputBarAccessoryView: UIView {
     }
 }
 
-extension UIImage {
-	/// Изменяет размер изображения так, чтобы оно поместилось в указанный размер, сохраняя пропорции.
-	/// - Parameter targetSize: Размер, в который должно поместиться изображение.
-	/// - Returns: Новое изображение с измененным размером.
-	func resizedToFit(in targetSize: CGSize) -> UIImage? {
-		let widthRatio  = targetSize.width  / self.size.width
-		let heightRatio = targetSize.height / self.size.height
-		let scaleFactor = min(widthRatio, heightRatio)
-		
-		let newSize = CGSize(width: self.size.width * scaleFactor, height: self.size.height * scaleFactor)
-		let renderer = UIGraphicsImageRenderer(size: newSize)
-		
-		return renderer.image { _ in
-			self.draw(in: CGRect(origin: .zero, size: newSize))
-		}
-	}
-}
