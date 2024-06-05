@@ -32,11 +32,10 @@ open class AttachmentManager: NSObject, InputPlugin {
     
     public enum Attachment {
         case image(UIImage)
-        case url(URL)
-        case data(Data)
+        case pdf(Data)
         case video(URL)
-        @available(*, deprecated, message: ".other(AnyObject) has been depricated as of 2.0.0")
-        case other(AnyObject)
+		//case url(URL)
+        //case other(AnyObject)
     }
     
     // MARK: - Properties [Public]
@@ -61,16 +60,12 @@ open class AttachmentManager: NSObject, InputPlugin {
     open var isPersistent = false { didSet { attachmentView.reloadData() } }
     
     /// A flag to determine if the AddAttachmentCell is visible
-    open var showAddAttachmentCell = true { didSet { attachmentView.reloadData() } }
+    //open var showAddAttachmentCell = true { didSet { attachmentView.reloadData() } }
     
     /// The color applied to the backgroundColor of the deleteButton in each `AttachmentCell`
-    open var tintColor: UIColor {
-        if #available(iOS 13, *) {
-            return .link
-        } else {
-            return .systemBlue
-        }
-    }
+	open var tintColor: UIColor {
+		return .white
+	}
     
     // MARK: - Initialization
     
@@ -102,11 +97,11 @@ open class AttachmentManager: NSObject, InputPlugin {
         } else if let url = object as? URL {
             if isVideoURL(url) {
                 attachment = .video(url)
-            } else {
-                attachment = .url(url)
-            }
+			} else {
+				return false
+			}
         } else if let data = object as? Data {
-            attachment = .data(data)
+            attachment = .pdf(data)
         } else {
             return false
         }
@@ -174,14 +169,14 @@ extension AttachmentManager: UICollectionViewDataSource, UICollectionViewDelegat
     }
     
     final public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return attachments.count + (showAddAttachmentCell ? 1 : 0)
+        return attachments.count// + (showAddAttachmentCell ? 1 : 0)
     }
     
     final public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        if indexPath.row == attachments.count && showAddAttachmentCell {
-            return createAttachmentCell(in: collectionView, at: indexPath)
-        }
+//        if indexPath.row == attachments.count && showAddAttachmentCell {
+//            return createAttachmentCell(in: collectionView, at: indexPath)
+//        }
         
         let attachment = attachments[indexPath.row]
         
@@ -248,9 +243,9 @@ extension AttachmentManager: UICollectionViewDataSource, UICollectionViewDelegat
         }
         
         // Prevent out of range error when the AttachmentCell has not been added the attachment array
-        if indexPath.row == attachments.count && showAddAttachmentCell {
-            return CGSize(width: height, height: height)
-        }
+//        if indexPath.row == attachments.count && showAddAttachmentCell {
+//            return CGSize(width: height, height: height)
+//        }
         
         let attachment = self.attachments[indexPath.row]
         if let customSize = self.dataSource?.attachmentManager(self, sizeFor: attachment, at: indexPath.row){
@@ -259,40 +254,40 @@ extension AttachmentManager: UICollectionViewDataSource, UICollectionViewDelegat
         
         return CGSize(width: height, height: height)
     }
-    
-    @objc open func createAttachmentCell(in collectionView: UICollectionView, at indexPath: IndexPath) -> AttachmentCell {
-        
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCell.reuseIdentifier, for: indexPath) as? AttachmentCell else {
-            fatalError()
-        }
-        cell.deleteButton.isHidden = true
-        // Draw a plus
-        let frame = CGRect(origin: CGPoint(x: cell.bounds.origin.x,
-                                           y: cell.bounds.origin.y),
-                           size: CGSize(width: cell.bounds.width - cell.padding.left - cell.padding.right,
-                                        height: cell.bounds.height - cell.padding.top - cell.padding.bottom))
-        let strokeWidth: CGFloat = 3
-        let length: CGFloat = frame.width / 2
-        let grayColor: UIColor
-        if #available(iOS 13, *) {
-            grayColor = .systemGray2
-        } else {
-            grayColor = .lightGray
-        }
-        let vLayer = CAShapeLayer()
-        vLayer.path = UIBezierPath(roundedRect: CGRect(x: frame.midX - (strokeWidth / 2),
-                                                       y: frame.midY - (length / 2),
-                                                       width: strokeWidth,
-                                                       height: length), cornerRadius: 5).cgPath
-        vLayer.fillColor = grayColor.cgColor
-        let hLayer = CAShapeLayer()
-        hLayer.path = UIBezierPath(roundedRect: CGRect(x: frame.midX - (length / 2),
-                                                       y: frame.midY - (strokeWidth / 2),
-                                                       width: length,
-                                                       height: strokeWidth), cornerRadius: 5).cgPath
-        hLayer.fillColor = grayColor.cgColor
-        cell.containerView.layer.addSublayer(vLayer)
-        cell.containerView.layer.addSublayer(hLayer)
-        return cell
-    }
+//    
+//    @objc open func createAttachmentCell(in collectionView: UICollectionView, at indexPath: IndexPath) -> AttachmentCell {
+//        
+//        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCell.reuseIdentifier, for: indexPath) as? AttachmentCell else {
+//            fatalError()
+//        }
+//        cell.deleteButton.isHidden = true
+//        // Draw a plus
+//        let frame = CGRect(origin: CGPoint(x: cell.bounds.origin.x,
+//                                           y: cell.bounds.origin.y),
+//                           size: CGSize(width: cell.bounds.width - cell.padding.left - cell.padding.right,
+//                                        height: cell.bounds.height - cell.padding.top - cell.padding.bottom))
+//        let strokeWidth: CGFloat = 3
+//        let length: CGFloat = frame.width / 2
+//        let grayColor: UIColor
+//        if #available(iOS 13, *) {
+//            grayColor = .systemGray2
+//        } else {
+//            grayColor = .lightGray
+//        }
+//        let vLayer = CAShapeLayer()
+//        vLayer.path = UIBezierPath(roundedRect: CGRect(x: frame.midX - (strokeWidth / 2),
+//                                                       y: frame.midY - (length / 2),
+//                                                       width: strokeWidth,
+//                                                       height: length), cornerRadius: 5).cgPath
+//        vLayer.fillColor = grayColor.cgColor
+//        let hLayer = CAShapeLayer()
+//        hLayer.path = UIBezierPath(roundedRect: CGRect(x: frame.midX - (length / 2),
+//                                                       y: frame.midY - (strokeWidth / 2),
+//                                                       width: length,
+//                                                       height: strokeWidth), cornerRadius: 5).cgPath
+//        hLayer.fillColor = grayColor.cgColor
+//        cell.containerView.layer.addSublayer(vLayer)
+//        cell.containerView.layer.addSublayer(hLayer)
+//        return cell
+//    }
 }
